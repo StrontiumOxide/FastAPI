@@ -19,7 +19,3 @@ class GetAnnouncementResponse(BaseModel):
 
 class UpdateAnnouncementRequest(CreateAnnouncementRequest):
     pass
-
-
-class SearchFieldsAnnouncementRequest(CreateAnnouncementRequest):
-    pass

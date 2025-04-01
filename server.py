@@ -1,11 +1,10 @@
-import os
+import uvicorn
 import asyncio
 from fastapi import FastAPI
 from schema import (
     CreateAnnouncementRequest, 
     GetAnnouncementResponse, 
-    UpdateAnnouncementRequest, 
-    SearchFieldsAnnouncementRequest
+    UpdateAnnouncementRequest
 )
 from database import Session, Announcement
 
@@ -83,16 +82,25 @@ async def patch_announcement(announcement_id: int, data: UpdateAnnouncementReque
         return {'status': 'unsuccess'}
 
 
-@app.get(path=r'/api/', tags=['AnnouncementFields'])
-async def get_fields_announcement(data: SearchFieldsAnnouncementRequest) -> dict:
+@app.get(path=r'/api/', tags=['AnnouncementTitle'])
+async def get_title_announcement(title: str) -> list[GetAnnouncementResponse | None]:
     """Функция для получения записи об объявлении из БД"""
-    pass
+    
+    with Session() as session:
+        results = session.query(Announcement)\
+            .filter(Announcement.title.ilike(f"%{title}%"))\
+            .order_by(Announcement.id.desc())\
+            .all()
+        
+    data = [GetAnnouncementResponse(**element.__dict__) for element in results]
+
+    return data
 
 
 async def main() -> None:
     """Главная функция"""
 
-    os.system(command='uvicorn server:app --port 8000')
+    uvicorn.run(app='server:app', host='0.0.0.0', port=8000, reload=True)
 
 
 if __name__ == '__main__':
